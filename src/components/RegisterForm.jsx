@@ -1,30 +1,44 @@
 import { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Shield } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
-const AuthForm = () => {
+const RegisterForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
-      const user = await signInWithEmailAndPassword(auth, email, password);
-      console.log('User signed in:', user);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Set user role in Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        email: user.email,
+        role: 'admin', // Assign admin role
+        createdAt: new Date(),
+      });
+
+      setSuccess('Utilisateur enregistré avec le rôle administrateur !');
+      setEmail('');
+      setPassword('');
     } catch (error) {
-      console.error('Login error:', error);
-      setError('Erreur de connexion: ' + error.message);
+      console.error('Registration error:', error);
+      setError('Erreur d\'inscription: ' + error.message);
     }
 
     setLoading(false);
@@ -37,8 +51,8 @@ const AuthForm = () => {
           <div className="mx-auto h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
             <Shield className="h-6 w-6 text-blue-600" />
           </div>
-          <CardTitle className="text-2xl font-bold">Interface de modération</CardTitle>
-          <p className="text-gray-600">Défi du Jour - Connexion modérateur</p>
+          <CardTitle className="text-2xl font-bold">Créer un compte administrateur</CardTitle>
+          <p className="text-gray-600">Défi du Jour - Inscription administrateur</p>
         </CardHeader>
 
         <CardContent>
@@ -49,6 +63,12 @@ const AuthForm = () => {
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             )}
+            {success && (
+              <div className="bg-green-50 border border-green-200 p-3 rounded-lg flex items-start space-x-2">
+                <Shield className="h-5 w-5 text-green-600 mt-0.5" />
+                <p className="text-sm text-green-700">{success}</p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -57,7 +77,7 @@ const AuthForm = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="moderateur@example.com"
+                placeholder="admin@example.com"
                 required
               />
             </div>
@@ -79,16 +99,13 @@ const AuthForm = () => {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? 'Inscription...' : "S'inscrire"}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500 mb-2">
-              Accès réservé aux modérateurs autorisés
-            </p>
-            <Link to="/register" className="text-sm text-blue-600 hover:underline">
-              Créer un compte administrateur
+            <Link to="/" className="text-sm text-blue-600 hover:underline">
+              Retour à la connexion
             </Link>
           </div>
         </CardContent>
@@ -97,5 +114,4 @@ const AuthForm = () => {
   );
 };
 
-export default AuthForm;
-
+export default RegisterForm;

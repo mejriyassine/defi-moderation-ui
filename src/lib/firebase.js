@@ -1,7 +1,7 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
-import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCxk1c8V0jDw-F4ZO_gxFAPLPr_k4mYX0k",
@@ -10,7 +10,7 @@ const firebaseConfig = {
   storageBucket: "defi-du-jour.firebasestorage.app",
   messagingSenderId: "73332910110",
   appId: "1:73332910110:web:463ac78e16944a4d5ae60f",
-  measurementId: "G-FZ7NZ1E6TL"
+  measurementId: "G-FZ7NZ1E6TL",
 };
 
 // Initialize Firebase
@@ -30,4 +30,3 @@ if (import.meta.env.DEV) {
 }
 
 export default app;
-
